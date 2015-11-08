@@ -1,0 +1,34 @@
+{
+  "name": "app-buildr",
+  "version": "0.0.0",
+  "description": "build tasks framework",
+  "main": "app-buildr.ts",
+  "scripts": {
+    "clean": "ts-node ./tools/clean.ts",
+    "compile": "npm run clean && tsc",
+    "example": "ts-node example/buildfile.ts",
+    "postinstall": "tsd reinstall --clean && tsd link",
+    "preinstall": "npm cache clean",
+    "reinstall": "rm -rf node_modules && npm install",
+    "test": "jasmine"
+  },
+  "keywords": [
+    "build",
+    "tasks"
+  ],
+  "author": "Ludovic Henin <ludovic.henin@yahoo.com>",
+  "license": "MIT",
+  "dependencies": {
+    "angular2": "2.0.0-alpha.45",
+    "lodash": "^3.10.1"
+  },
+  "devDependencies": {
+    "del": "^2.0.2",
+    "gulp": "^3.9.0",
+    "gulp-load-plugins": "^1.0.0",
+    "jasmine": "^2.3.2",
+    "ts-node": "^0.2.4",
+    "tsd": "^0.6.5",
+    "typescript": "^1.6.2"
+  }
+}
