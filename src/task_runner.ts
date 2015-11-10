@@ -1,28 +1,52 @@
 import {Injectable} from 'angular2/core';
-import {TaskRegistry, EventRegistry, TaskEntry} from './task_registry';
+import {TaskRegistry, EventRegistry, TaskEntry, VirtualTaskEntry} from './task_registry';
 import {AppInjector} from './task_manager';
+import {parseInstruction} from './utils';
 
+
+export interface TaskInstruction {
+  name: string;
+  action: string;
+}
 
 @Injectable()
 export class TaskRunner {
   constructor(private _taskRegistry: TaskRegistry,
               private _eventRegistry: EventRegistry) {
   }
-  run(taskname: string) {
-    console.log(this._taskRegistry);
-    console.log(this._eventRegistry);
-    // console.log(EVENTS_REGISTRY);
-    let taskEntry: TaskEntry = this._taskRegistry.find({taskname});
+  run(taskToRun: string) {
+    let task = parseInstruction(taskToRun);
+    let taskEntry = this._taskRegistry.find({taskname: task.name});
 
     if (!taskEntry) {
-      throw new Error(`Could not find task ${taskname}`); }
+      throw new Error(`Could not find task ${task.name}`); }
 
-    let task = taskEntry.task;
-    let taskInstance = AppInjector.get().resolveAndInstantiate(task);
-
-    this._link(task, taskInstance);
+    if (taskEntry.isVirtual) {
+      this._runVirtual(taskEntry);
+    } else {
+      this._run(task, taskEntry);
+    }
   }
-  private _link(task, taskInstance) {
+  private _run(task: TaskInstruction, taskEntry: TaskEntry): void {
+    let taskClass = taskEntry.task;
+    let taskInstance = AppInjector.get().resolveAndInstantiate(taskClass);
+
+    this._link(taskClass, taskInstance);
+
+    if (task.action) {
+      if (!taskInstance[task.action]) {
+        throw new Error(`Could not find action ${task.action} in task ${task.name}`); }
+
+      taskInstance[task.action]();
+    }
+  }
+  private _runVirtual(taskEntry: VirtualTaskEntry): void {
+    let _this = this;
+    taskEntry.sequence.forEach(taskname => {
+      _this.run(taskname);
+    });
+  }
+  private _link(task, taskInstance): void {
     let outputs = this._eventRegistry.getOutputs(task);
 
     outputs.forEach(output => {

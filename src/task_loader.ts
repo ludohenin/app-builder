@@ -30,6 +30,7 @@ export class TaskLoader {
   }
   load(path: string | string[]): void {
     let paths = _.isArray(path) ? path : [path];
-    paths.forEach(path => TaskLoader.scandir(path, this._registry.registerTask(path)));
+    paths.forEach(path =>
+      TaskLoader.scandir(path, this._registry.registerLoadedTask(path)));
   }
 }

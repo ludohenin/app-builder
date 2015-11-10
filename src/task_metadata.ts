@@ -10,7 +10,6 @@ interface TaskFactory {
 
 export class TaskMetadata {
   constructor(public options) {
-    console.log(`> class TaskMetadata instantiated`);
   }
 }
 

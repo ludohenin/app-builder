@@ -44,7 +44,7 @@ export class Builder {
   start(taskname: string): void {
     this._runner.run(taskname);
   }
-  task(name: string, tasks: any[]) {
-    console.log(`> registered task '${name}' (to be implemented)`);
+  task(taskname: string, sequence: any[]) {
+    this._taskRegistry.registerVirtualTask(taskname, sequence);
   }
 }

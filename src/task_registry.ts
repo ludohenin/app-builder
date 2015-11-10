@@ -6,10 +6,17 @@ import {TaskMetadata} from './task_metadata';
 
 
 export interface TaskEntry {
+  isVirtual: boolean;
   filename: string;
   taskname: string;
   classname: string;
   task: any;
+}
+
+export interface VirtualTaskEntry {
+  isVirtual: boolean;
+  taskname: string;
+  sequence: string[];
 }
 
 export interface EventEntry {
@@ -19,10 +26,11 @@ export interface EventEntry {
 }
 
 class Registry extends Array {
+  // NOTE: maybe not needed.
   reset(): void {
     this.splice(0, this.length);
   }
-  find(query): TaskEntry {
+  find<TaskEntry,VirtualTaskEntry>(query) {
     return _.find(this, query);
   }
 }
@@ -59,12 +67,13 @@ export class TaskRegistry extends Registry {
   constructor(private _eventRegistry: EventRegistry) {
     super();
   }
-  registerTask(path: string): (taskname: string) => void {
+  registerLoadedTask(path: string): (taskname: string) => void {
     return (taskname: string): void => {
       let filename = join(path, `${taskname}`);
       let filename_abs = join(process.cwd(), filename);
       let classname = classifyName(taskname);
       let task = require(filename_abs)[classname];
+      let isVirtual = false;
 
       // let exist = this.find({taskname});
       // if (!task) {
@@ -73,10 +82,16 @@ export class TaskRegistry extends Registry {
       //   throw new Error(`Task ${taskname} is already registered from ${exist.filename}`); }
 
       // Register tasks.
-      let taskEntry: TaskEntry = {filename, taskname, classname, task};
+      let taskEntry: TaskEntry = {filename, taskname, classname, task, isVirtual};
       this.push(taskEntry);
       // Register task events.
       this._eventRegistry.registerEvents(task);
     };
+  }
+  registerVirtualTask(taskname: string, sequence: string[]): void {
+    let isVirtual = true;
+    let taskEntry: VirtualTaskEntry = {taskname, sequence, isVirtual};
+
+    this.push(taskEntry);
   }
 }

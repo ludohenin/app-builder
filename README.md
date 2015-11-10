@@ -6,6 +6,8 @@ Build library for web application.
 
 Leverages Angular2 DI system and EventEmitter.
 
+__TODO:__ find a better name :)
+
 
 ## Installation
 
