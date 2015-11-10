@@ -1,28 +1,25 @@
-import {Injectable} from 'angular2/core';
+import {Injectable} from 'angular2/angular2';
 import {readdirSync, existsSync, lstatSync} from 'fs';
 import * as _ from 'lodash';
 import {join} from 'path';
+import {TaskRegistry} from './registry';
 
-import {TaskRegistry} from './task_registry';
 
 @Injectable()
 export class TaskLoader {
   constructor(private _registry: TaskRegistry) {
   }
-  public static scandir(path: string, callback: (taskname: string) => any): void {
+  private static scandir(path: string, callback: (taskname: string) => any): void {
     if (!existsSync(path)) return;
 
     walk(path);
 
-    function walk(path) {
+    function walk(path: string): void {
       readdirSync(path).forEach(function(file) {
         let curPath = join(path, file);
-        // if (lstatSync(curPath).isDirectory()) { // recurse
-        //   path = file;
-        //   walk(curPath);
-        // }
+        // NOTE: See if recursive scaning is required.
         if (lstatSync(curPath).isFile() && file.endsWith('.ts')) {
-          let taskname = file.replace(/(\.ts)/, '');
+          let taskname = file.replace(/(\.ts)$/, '');
           callback(taskname);
         }
       });
@@ -30,7 +27,6 @@ export class TaskLoader {
   }
   load(path: string | string[]): void {
     let paths = _.isArray(path) ? path : [path];
-    paths.forEach(path =>
-      TaskLoader.scandir(path, this._registry.registerLoadedTask(path)));
+    paths.forEach(path => TaskLoader.scandir(path, this._registry.registerLoadedTask(path)));
   }
 }

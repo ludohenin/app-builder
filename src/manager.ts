@@ -1,24 +1,30 @@
-import {Injector, Injectable} from 'angular2/core';
-import {TaskLoader} from './task_loader';
-import {TaskRegistry, EventRegistry} from './task_registry';
-import {TaskRunner} from './task_runner';
+import {Injector, Injectable} from 'angular2/angular2';
+import {TaskLoader} from './loader';
+import {TaskRegistry, EventRegistry} from './registry';
+import {TaskRunner} from './runner';
 
+
+// TODO: Add method makeInjector for TaskMetadata declaring providers.
+let initialized: boolean = false;
 
 export class AppInjector {
   private static _injector: Injector;
   private static _rootInjector: Injector;
   static init(providers: any[]): Injector {
+    if (initialized) {
+      throw new Error('AppInjector can only be initialized once'); }
+
     const CORE_PROVIDERS = [
-      TaskRegistry,
-      EventRegistry,
       Builder,
+      EventRegistry,
       TaskLoader,
+      TaskRegistry,
       TaskRunner
     ];
 
     AppInjector._rootInjector = Injector.resolveAndCreate(CORE_PROVIDERS);
-    // TODO: Allow to init only once.
     AppInjector._injector = AppInjector._rootInjector.resolveAndCreateChild(providers);
+    initialized = true;
     return AppInjector._injector;
   }
   static get(): Injector {
@@ -44,7 +50,7 @@ export class Builder {
   start(taskname: string): void {
     this._runner.run(taskname);
   }
-  task(taskname: string, sequence: any[]) {
+  task(taskname: string, sequence: any[]): void {
     this._taskRegistry.registerVirtualTask(taskname, sequence);
   }
 }

@@ -2,14 +2,17 @@ import {Task, EventEmitter} from '../../app-buildr';
 import {Gulp, GulpPlugins} from '../build.config';
 
 
-@Task({ outputs: ['subBuild'], inputs: ['build'] })
+@Task({
+  outputs: ['subBuild:build'],
+  inputs: ['build:onbuild']
+})
 export class SubBuildJs {
-  subBuild: EventEmitter = new EventEmitter();
+  build: EventEmitter = new EventEmitter();
   constructor(private gulp: Gulp, private plugins: GulpPlugins) {
     console.log(`> TaskClass SubBuildJs instantiated.`);
   }
-  build() {
+  onbuild() {
     console.log(`> TaskClass SubBuildJs ran build().`);
-    setTimeout(() => this.subBuild.next(null), 1000);
+    setTimeout(() => this.build.next(null), 1000);
   }
 }

@@ -2,12 +2,12 @@ import {Task} from '../../app-buildr';
 import {Gulp, GulpPlugins} from '../build.config';
 
 
-@Task({ inputs: ['subBuild'] })
+@Task({ inputs: ['subBuild:build'] })
 export class SubSubBuildJs {
   constructor(private gulp: Gulp, private plugins: GulpPlugins) {
     console.log(`> TaskClass SubSubBuildJs instantiated.`);
   }
-  subBuild() {
-    console.log(`> TaskClass SubSubBuildJs ran subBuild().`);
+  build() {
+    console.log(`> TaskClass SubSubBuildJs ran build().`);
   }
 }

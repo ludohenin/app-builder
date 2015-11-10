@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+- '4.0'
+- '4.1'
+- '4.2'
+- '5.0'
+sudo: false
+services:
+before_install:
+- npm update -g npm
+- npm --version
+before_script:
+notifications:
+  email: true
+after_failure: cat /home/travis/build/ludohenin/app-buildr/npm-debug.log
+branches:
+  only:
+  - master

@@ -1,11 +1,11 @@
 require('reflect-metadata/Reflect');
 
-import {Builder} from './src/task_manager';
+import {Builder} from './src/manager';
 
 let builder: Builder;
 
 export {EventEmitter} from 'angular2/angular2';
-export {Task} from './src/task_metadata';
+export {Task} from './src/metadata';
 export function init(providers: any[]): void {
   builder = Builder.init(providers);
 }

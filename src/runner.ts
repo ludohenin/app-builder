@@ -1,6 +1,6 @@
-import {Injectable} from 'angular2/core';
-import {TaskRegistry, EventRegistry, TaskEntry, VirtualTaskEntry} from './task_registry';
-import {AppInjector} from './task_manager';
+import {Injectable} from 'angular2/angular2';
+import {TaskRegistry, EventRegistry, TaskEntry, VirtualTaskEntry} from './registry';
+import {AppInjector} from './manager';
 import {parseInstruction} from './utils';
 
 
@@ -9,13 +9,14 @@ export interface TaskInstruction {
   action: string;
 }
 
+
 @Injectable()
 export class TaskRunner {
   constructor(private _taskRegistry: TaskRegistry,
               private _eventRegistry: EventRegistry) {
   }
-  run(taskToRun: string) {
-    let task = parseInstruction(taskToRun);
+  run(taskInstruction: string): void {
+    let task = parseInstruction(taskInstruction);
     let taskEntry = this._taskRegistry.find({taskname: task.name});
 
     if (!taskEntry) {
@@ -41,25 +42,31 @@ export class TaskRunner {
     }
   }
   private _runVirtual(taskEntry: VirtualTaskEntry): void {
-    let _this = this;
-    taskEntry.sequence.forEach(taskname => {
-      _this.run(taskname);
+    taskEntry.sequence.forEach(taskInstruction => {
+      // TODO: Handle async tasks.
+      this.run(taskInstruction);
     });
   }
-  private _link(task, taskInstance): void {
+  private _link(task: any, outputTaskInstance: any): void {
     let outputs = this._eventRegistry.getOutputs(task);
 
     outputs.forEach(output => {
-      let inputs = this._eventRegistry.getInputs(output.event);
+      let inputs = this._eventRegistry.getInputs(output.eventname);
       inputs.forEach(input => {
-        let listnerTask = AppInjector.get().resolveAndInstantiate(input.task);
-        let observable = taskInstance[output.event];
-        let observer = listnerTask[output.event];
-        observable.observer({next: observer.bind(listnerTask)});
+        let inputTaskInstance = AppInjector.get().resolveAndInstantiate(input.task);
+        let observable = outputTaskInstance[output.eventaction];
+        let observer = inputTaskInstance[input.eventaction];
+
+        if (!(output.eventaction in outputTaskInstance)) {
+          throw new Error(`Could not find ${output.eventaction} in task ${output.task.name}`); }
+        if (!(input.eventaction in inputTaskInstance)) {
+          throw new Error(`Could not find ${input.eventaction} in task ${input.task.name}`); }
+
+        observable.observer({next: observer.bind(inputTaskInstance)});
 
         // link recursively.
         // TODO: Check for circular references.
-        this._link(input.task, listnerTask);
+        this._link(input.task, inputTaskInstance);
       });
     });
   }

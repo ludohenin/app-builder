@@ -7,10 +7,11 @@
     "clean": "ts-node ./tools/clean.ts",
     "compile": "npm run clean && tsc",
     "example": "ts-node example/buildfile.ts",
+    "lint": "tslint **/*.ts",
     "postinstall": "tsd reinstall --clean && tsd link",
     "preinstall": "npm cache clean",
     "reinstall": "rm -rf node_modules && npm install",
-    "test": "jasmine"
+    "test": "npm run lint && jasmine"
   },
   "keywords": [
     "build",
@@ -29,6 +30,7 @@
     "jasmine": "^2.3.2",
     "ts-node": "^0.2.4",
     "tsd": "^0.6.5",
+    "tslint": "^2.5.1",
     "typescript": "^1.6.2"
   }
 }

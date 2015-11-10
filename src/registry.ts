@@ -1,8 +1,8 @@
-import {Injectable} from 'angular2/core';
+import {Injectable} from 'angular2/angular2';
 import * as _ from 'lodash';
 import {join} from 'path';
-import {classifyName} from './utils';
-import {TaskMetadata} from './task_metadata';
+import {classifyName, parseInstruction} from './utils';
+import {TaskMetadata} from './metadata';
 
 
 export interface TaskEntry {
@@ -21,46 +21,54 @@ export interface VirtualTaskEntry {
 
 export interface EventEntry {
   type: string;
-  event: string;
+  eventname: string;
+  eventaction: string;
   task: any;
 }
 
+export interface EventInstruction {
+  name: string;
+  action: string;
+}
+
 class Registry extends Array {
-  // NOTE: maybe not needed.
-  reset(): void {
-    this.splice(0, this.length);
-  }
-  find<TaskEntry,VirtualTaskEntry>(query) {
+  // TODO: Check if this types are required.
+  find<TaskEntry,VirtualTaskEntry>(query: any) {
     return _.find(this, query);
   }
 }
+
 
 @Injectable()
 export class EventRegistry extends Registry {
   private static getTaskMetadata(annotations: any[]): TaskMetadata {
     return _.find((annotations), (annotation) => annotation instanceof TaskMetadata);
   }
-  registerEvents(task: TaskMetadata): void {
+  registerEvents(task: any): void {
     let annotations = Reflect.getOwnMetadata('annotations', task) || [];
     let annotation = EventRegistry.getTaskMetadata(annotations);
 
     ['inputs', 'outputs'].forEach(type => {
       if (!annotation.options) return;
-      let events = annotation.options[type] || [];
-      events.forEach((event) => {
-        // TODO: Normalize event name my-event.name => myEventName()
-        let eventEntry: EventEntry = {type, event, task};
+      let events: string[] = annotation.options[type] || [];
+      events.forEach((EventInstruction) => {
+        let event = parseInstruction(EventInstruction);
+        let eventEntry: EventEntry = {type,
+                                      eventname: event.name,
+                                      eventaction: event.action || event.name,
+                                      task};
         this.push(eventEntry);
       });
     });
   }
-  getOutputs(task: any) {
+  getOutputs(task: any): EventEntry[] {
     return _.where(this, {task, type: 'outputs'});
   }
-  getInputs(event: string) {
-    return _.where(this, {event, type: 'inputs'});
+  getInputs(eventname: string): EventEntry[] {
+    return _.where(this, {eventname, type: 'inputs'});
   }
 }
+
 
 @Injectable()
 export class TaskRegistry extends Registry {
@@ -69,7 +77,7 @@ export class TaskRegistry extends Registry {
   }
   registerLoadedTask(path: string): (taskname: string) => void {
     return (taskname: string): void => {
-      let filename = join(path, `${taskname}`);
+      let filename = join(path, taskname);
       let filename_abs = join(process.cwd(), filename);
       let classname = classifyName(taskname);
       let task = require(filename_abs)[classname];
@@ -81,10 +89,9 @@ export class TaskRegistry extends Registry {
       // if (exist) {
       //   throw new Error(`Task ${taskname} is already registered from ${exist.filename}`); }
 
-      // Register tasks.
       let taskEntry: TaskEntry = {filename, taskname, classname, task, isVirtual};
       this.push(taskEntry);
-      // Register task events.
+
       this._eventRegistry.registerEvents(task);
     };
   }
