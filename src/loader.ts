@@ -1,6 +1,6 @@
 import {Injectable} from 'angular2/angular2';
 import {readdirSync, existsSync, lstatSync} from 'fs';
-import * as _ from 'lodash';
+import {isArray} from 'lodash';
 import {join} from 'path';
 import {TaskRegistry} from './registry';
 
@@ -25,8 +25,11 @@ export class TaskLoader {
       });
     }
   }
+  /**
+   * Load task files and register them.
+   */
   load(path: string | string[]): void {
-    let paths = _.isArray(path) ? path : [path];
+    let paths = isArray(path) ? path : [path];
     paths.forEach(path => TaskLoader.scandir(path, this._registry.registerLoadedTask(path)));
   }
 }

@@ -6,12 +6,14 @@
   "scripts": {
     "clean": "ts-node ./tools/clean.ts",
     "compile": "npm run clean && tsc",
+    "doc": "rm -rf doc && typedoc --out doc src",
     "example": "ts-node example/buildfile.ts",
     "lint": "tslint **/*.ts",
     "postinstall": "tsd reinstall --clean && tsd link",
     "preinstall": "npm cache clean",
     "reinstall": "rm -rf node_modules && npm install",
-    "test": "npm run lint && jasmine"
+    "test": "npm run lint && npm run compile && jasmine && npm run clean",
+    "test-dev": "watch jasmine --wait=1"
   },
   "keywords": [
     "build",
@@ -31,6 +33,8 @@
     "ts-node": "^0.2.4",
     "tsd": "^0.6.5",
     "tslint": "^2.5.1",
-    "typescript": "^1.6.2"
+    "typedoc": "^0.3.12",
+    "typescript": "^1.6.2",
+    "watch": "^0.16.0"
   }
 }

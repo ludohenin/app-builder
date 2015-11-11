@@ -1,6 +1,6 @@
 import {Injectable} from 'angular2/angular2';
-import {TaskRegistry, EventRegistry, TaskEntry, VirtualTaskEntry} from './registry';
-import {AppInjector} from './manager';
+import {EventRegistry, TaskEntry, TaskRegistry, VirtualTaskEntry} from './registry';
+import {AppInjector} from './injector';
 import {parseInstruction} from './utils';
 
 
@@ -28,22 +28,24 @@ export class TaskRunner {
       this._run(task, taskEntry);
     }
   }
+  // TODO: Handle async tasks.
   private _run(task: TaskInstruction, taskEntry: TaskEntry): void {
     let taskClass = taskEntry.task;
     let taskInstance = AppInjector.get().resolveAndInstantiate(taskClass);
 
     this._link(taskClass, taskInstance);
 
+    // TODO: Change this
     if (task.action) {
-      if (!taskInstance[task.action]) {
-        throw new Error(`Could not find action ${task.action} in task ${task.name}`); }
+      // NOTE: Task should be able to listen without action other than the one set int he constructor.
+      // if (!taskInstance[task.action]) {
+      //   throw new Error(`Could not find action ${task.action} in task ${task.name}`); }
 
       taskInstance[task.action]();
     }
   }
   private _runVirtual(taskEntry: VirtualTaskEntry): void {
     taskEntry.sequence.forEach(taskInstruction => {
-      // TODO: Handle async tasks.
       this.run(taskInstruction);
     });
   }

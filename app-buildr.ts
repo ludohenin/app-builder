@@ -1,13 +1,26 @@
 require('reflect-metadata/Reflect');
 
-import {Builder} from './src/manager';
+import {Builder} from './src/builder';
+import {TaskLoader} from './src/loader';
+import {TaskRegistry, EventRegistry} from './src/registry';
+import {TaskRunner} from './src/runner';
+
+
+const CORE_PROVIDERS = [
+  Builder,
+  EventRegistry,
+  TaskLoader,
+  TaskRegistry,
+  TaskRunner
+];
+
 
 let builder: Builder;
 
 export {EventEmitter} from 'angular2/angular2';
 export {Task} from './src/metadata';
-export function init(providers: any[]): void {
-  builder = Builder.init(providers);
+export function init(buildProviders: any[]): void {
+  builder = Builder.init(CORE_PROVIDERS, buildProviders);
 }
 export function load(path: string|string[]) {
   isInit();
@@ -23,6 +36,8 @@ export function start(task: string) {
 }
 
 
+// ----------
+// Helper.
 function isInit() {
   if (!builder && !(builder instanceof Builder)) {
     throw new Error('You must run init first'); }

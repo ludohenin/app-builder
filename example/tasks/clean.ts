@@ -1,12 +1,9 @@
 import {Task} from '../../app-buildr';
-import {Gulp, GulpPlugins} from '../build.config';
+import {BaseTask} from '../base_task';
 
 
 @Task()
-export class Clean {
-  constructor(private gulp: Gulp, private plugins: GulpPlugins) {
-    console.log(`> TaskClass Clean instantiated.`);
-  }
+export class Clean extends BaseTask {
   all() {
     console.log(`> TaskClass Clean ran all().`);
     this.dist();
