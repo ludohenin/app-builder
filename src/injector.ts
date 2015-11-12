@@ -19,3 +19,7 @@ export class AppInjector {
     return AppInjector._injector;
   }
 }
+
+
+export class TaskInjection {
+}

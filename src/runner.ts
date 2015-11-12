@@ -1,6 +1,7 @@
 import {Injectable} from 'angular2/angular2';
+import * as extend from 'extend';
 import {EventRegistry, LoadedTaskEntry, TaskRegistry, VirtualTaskEntry} from './registry';
-import {AppInjector} from './injector';
+import {AppInjector, TaskInjection} from './injector';
 import {parseInstruction} from './utils';
 
 
@@ -32,7 +33,11 @@ export class TaskRunner {
   //       What do we handle here ?
   private _run(task: TaskInstruction, taskEntry: LoadedTaskEntry): void {
     let taskClass = taskEntry.task;
+    let superTask = AppInjector.get().get(TaskInjection);
     let taskInstance = AppInjector.get().resolveAndInstantiate(taskClass);
+
+    // Inject task dependencies.
+    extend(taskInstance, superTask);
 
     this._link(taskClass, taskInstance);
 
