@@ -1,21 +1,23 @@
+// TODO: Rename this file to `register`.
 import {Injectable} from 'angular2/angular2';
 import {find, where} from 'lodash';
 import {join} from 'path';
 import {TaskMetadata} from './metadata';
 import {classifyName, parseInstruction} from './utils';
 
-// TODO: add isAsync, injector
-export interface TaskEntry {
+interface TaskEntry {
   isVirtual: boolean;
-  filename: string;
   taskname: string;
+}
+
+// TODO: add isAsync, injector.
+export interface LoadedTaskEntry extends TaskEntry {
+  filename: string;
   classname: string;
   task: any;
 }
 
-export interface VirtualTaskEntry {
-  isVirtual: boolean;
-  taskname: string;
+export interface VirtualTaskEntry extends TaskEntry {
   sequence: string[];
 }
 
@@ -33,7 +35,7 @@ export interface EventInstruction {
 
 class Registry extends Array {
   // TODO: Check if these types are required.
-  find<TaskEntry,VirtualTaskEntry>(query: any) {
+  find<LoadedTaskEntry,VirtualTaskEntry>(query: any) {
     return find(this, query);
   }
 }
@@ -58,9 +60,10 @@ export class EventRegistry extends Registry {
       let events: string[] = annotation.options[type] || [];
       events.forEach((EventInstruction) => {
         let event = parseInstruction(EventInstruction);
+        let eventaction = event.action || (type === 'inputs' ? 'default' : event.name);
         let eventEntry: EventEntry = {type,
                                       eventname: event.name,
-                                      eventaction: event.action || event.name,
+                                      eventaction,
                                       task};
         this.push(eventEntry);
       });
@@ -80,7 +83,10 @@ export class EventRegistry extends Registry {
   }
 }
 
-
+// NOTE: Should every task be registered as an observable?
+//       Would enable observers to subscribe without manually declaring observables.
+//       But maybe not such a good idea. Declarative way of registring a root task
+//       reponsible to trigger the event seems more reliable.
 @Injectable()
 export class TaskRegistry extends Registry {
   constructor(private _eventRegistry: EventRegistry) {
@@ -103,11 +109,12 @@ export class TaskRegistry extends Registry {
       if (!task) {
         throw new Error (`Could not find class ${classname} in ${filename}`); }
 
+      // TODO: Find a way to handle identical file names from different origin (forbid or namespace ?).
       // let exist = this.find({taskname});
       // if (exist) {
       //   throw new Error(`Task ${taskname} is already registered from ${exist.filename}`); }
 
-      let taskEntry: TaskEntry = {filename, taskname, classname, task, isVirtual};
+      let taskEntry: LoadedTaskEntry = {filename, taskname, classname, task, isVirtual};
       this.push(taskEntry);
 
       this._eventRegistry.registerEvents(task);

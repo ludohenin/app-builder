@@ -11,6 +11,6 @@
         "experimentalDecorators": true,
         "sourceMap": true
     },
-    "exclude": ["node_modules"],
+    "exclude": [".c9", "node_modules"],
     "compileOnSave": false
 }

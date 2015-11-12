@@ -5,10 +5,10 @@ import {BaseTask} from '../base_task';
 @Task()
 export class Clean extends BaseTask {
   all() {
-    console.log(`> TaskClass Clean ran all().`);
+    console.log(`> ${this.constructor.name} ran all().`);
     this.dist();
   }
   dist() {
-    console.log(`> TaskClass Clean ran dist().`);
+    console.log(`> ${this.constructor.name} ran dist().`);
   }
 }

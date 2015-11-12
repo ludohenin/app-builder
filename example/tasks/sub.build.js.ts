@@ -9,7 +9,7 @@ import {BaseTask} from '../base_task';
 export class SubBuildJs extends BaseTask {
   build: EventEmitter = new EventEmitter();
   onbuild() {
-    console.log(`> TaskClass SubBuildJs ran build().`);
+    console.log(`> ${this.constructor.name} ran build().`);
     setTimeout(() => this.build.next(null), 1000);
   }
 }

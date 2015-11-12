@@ -1,12 +1,18 @@
 import {Task, EventEmitter} from '../../app-buildr';
-import {Gulp, GulpPlugins} from '../build.config';
+import {BaseTask} from '../base_task';
+import {Gulp, GulpPlugins, Config} from '../build.config';
 
-// TODO: Find an elegant way to handle this case.
+
 @Task({ outputs: ['build'] })
-export class BuildJs {
+export class BuildJs extends BaseTask {
   build: EventEmitter = new EventEmitter();
-  constructor(private gulp: Gulp, private plugins: GulpPlugins) {
-    console.log(`> TaskClass BuildJs instantiated.`);
+  // NOTE: Injection does not work from parent class. How to make this more elegant ?
+  constructor(public gulp: Gulp, public plugins: GulpPlugins, public config: Config) {
+    super();
+  }
+  default() {
+    console.log(`> ${this.constructor.name} ran default()`);
+    console.log(this.config);
     setTimeout(() => this.build.next(null), 1000);
   }
 }

@@ -1,5 +1,5 @@
 import {Injectable} from 'angular2/angular2';
-import {EventRegistry, TaskEntry, TaskRegistry, VirtualTaskEntry} from './registry';
+import {EventRegistry, LoadedTaskEntry, TaskRegistry, VirtualTaskEntry} from './registry';
 import {AppInjector} from './injector';
 import {parseInstruction} from './utils';
 
@@ -28,20 +28,18 @@ export class TaskRunner {
       this._run(task, taskEntry);
     }
   }
-  // TODO: Handle async tasks.
-  private _run(task: TaskInstruction, taskEntry: TaskEntry): void {
+  // TODO: Handle async tasks (Gulp handes async callback, returned stream & returned promise).
+  //       What do we handle here ?
+  private _run(task: TaskInstruction, taskEntry: LoadedTaskEntry): void {
     let taskClass = taskEntry.task;
     let taskInstance = AppInjector.get().resolveAndInstantiate(taskClass);
 
     this._link(taskClass, taskInstance);
 
-    // TODO: Change this
     if (task.action) {
-      // NOTE: Task should be able to listen without action other than the one set int he constructor.
-      // if (!taskInstance[task.action]) {
-      //   throw new Error(`Could not find action ${task.action} in task ${task.name}`); }
-
       taskInstance[task.action]();
+    } else {
+      taskInstance['default']();
     }
   }
   private _runVirtual(taskEntry: VirtualTaskEntry): void {
