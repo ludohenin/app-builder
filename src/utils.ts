@@ -18,11 +18,11 @@ export function classifyName(name: string): string {
  */
 export function methodifyName(name: string): string {
   return name.toLowerCase()
-    .replace( /[-_\.]+/g, ' ')
+    .replace(/[-_\.]+/g, ' ')
     .trim()
-    .replace( /[^\w\s]/g, '')
-    .replace( / (.)/g, function($1) { return $1.toUpperCase(); })
-    .replace( / /g, '' );
+    .replace(/[^\w\s]/g, '')
+    .replace(/ (.)/g, function($1) { return $1.toUpperCase(); })
+    .replace(/ /g, '');
 }
 
 /**

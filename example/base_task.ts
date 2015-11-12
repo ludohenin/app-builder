@@ -1,6 +1,8 @@
 export class BaseTask {
+  // Properties declared to avoid compiler complaints.
+  // They will be set later on dynamically from passed TASK_PROVIDERS.
   gulp: any;
-  plugins: any;
+  gulpPlugins: any;
   config: any;
   constructor() {
     console.log(`> ${this.constructor.name} instantiated`);
@@ -9,16 +11,3 @@ export class BaseTask {
     console.log(`> ${this.constructor.name} ran default() (method not implemented)`);
   }
 }
-
-
-// @Injectable()
-// export class BaseTask {
-//   constructor(/*public gulp: Gulp,
-//               public plugins: GulpPlugins,
-//               public config: Config*/) {
-//     console.log(`> ${this.constructor.name} instantiated`);
-//   }
-//   default() {
-//     console.log(`> ${this.constructor.name} ran default() (method not implemented)`);
-//   }
-// }
