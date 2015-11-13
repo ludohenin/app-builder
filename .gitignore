@@ -35,6 +35,3 @@ dist
 dev
 *.js
 *.js.map
-
-#To be removed
-spec/**/*.ts

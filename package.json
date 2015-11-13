@@ -4,16 +4,13 @@
   "description": "build tasks framework",
   "main": "app-buildr.ts",
   "scripts": {
-    "clean": "ts-node ./tools/clean.ts",
-    "compile": "npm run clean && tsc",
-    "doc": "rm -rf doc && typedoc --out doc src",
     "example": "ts-node example/buildfile.ts",
     "lint": "tslint **/*.ts",
     "postinstall": "tsd reinstall --clean && tsd link",
-    "preinstall": "npm cache clean",
-    "reinstall": "rm -rf node_modules && npm install",
-    "test": "npm run lint && npm run compile && jasmine && npm run clean",
-    "test-dev": "watch jasmine --wait=1"
+    "reinstall": "rimraf node_modules && npm cache clean && npm install",
+    "test": "rimraf test && npm run lint && npm run tsc.test && jasmine",
+    "test.dev": "watch jasmine --wait=1",
+    "tsc.test": "tsc --outDir test"
   },
   "keywords": [
     "build",
@@ -31,10 +28,10 @@
     "gulp": "^3.9.0",
     "gulp-load-plugins": "^1.0.0",
     "jasmine": "^2.3.2",
+    "rimraf": "^2.4.3",
     "ts-node": "^0.2.4",
     "tsd": "^0.6.5",
     "tslint": "^2.5.1",
-    "typedoc": "^0.3.12",
     "typescript": "^1.6.2",
     "watch": "^0.16.0"
   }
