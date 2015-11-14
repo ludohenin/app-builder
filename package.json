@@ -4,13 +4,14 @@
   "description": "build tasks framework",
   "main": "app-buildr.ts",
   "scripts": {
+    "clean": "rimraf example/**/*.js spec/**/*.js src/**/*.js app-buildr.js",
+    "compile": "tsc",
     "example": "ts-node example/buildfile.ts",
     "lint": "tslint **/*.ts",
     "postinstall": "tsd reinstall --clean && tsd link",
     "reinstall": "rimraf node_modules && npm cache clean && npm install",
-    "test": "rimraf test && npm run lint && npm run tsc.test && jasmine",
-    "test.dev": "watch jasmine --wait=1",
-    "tsc.test": "tsc --outDir test"
+    "test": "npm run clean && npm run lint && npm run compile && jasmine",
+    "test.dev": "watch jasmine --wait=0.5"
   },
   "keywords": [
     "build",
@@ -19,7 +20,7 @@
   "author": "Ludovic Henin <ludovic.henin@yahoo.com>",
   "license": "MIT",
   "dependencies": {
-    "angular2": "2.0.0-alpha.45",
+    "angular2": "2.0.0-alpha.46",
     "extend": "^3.0.0",
     "lodash": "^3.10.1"
   },

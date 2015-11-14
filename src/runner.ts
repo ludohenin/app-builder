@@ -21,7 +21,7 @@ export class TaskRunner {
     let taskEntry = this._taskRegistry.find({taskname: task.name});
 
     if (!taskEntry) {
-      throw new Error(`Could not find task ${task.name}`); }
+      throw new Error(`Could not find task ${task.name}, task not registered`); }
 
     if (taskEntry.isVirtual) {
       this._runVirtual(taskEntry);
@@ -73,7 +73,7 @@ export class TaskRunner {
         if (!(input.eventaction in inputTaskInstance)) {
           throw new Error(`Could not find ${input.eventaction} in task ${input.task.name}`); }
 
-        observable.observer({next: observer.bind(inputTaskInstance)});
+        observable.subscribe({next: observer.bind(inputTaskInstance)});
 
         // link recursively.
         // TODO: Check for circular references.

@@ -4,7 +4,7 @@ import {BaseTask} from '../base_task';
 
 @Task({ outputs: ['build'] })
 export class BuildJs extends BaseTask {
-  build: EventEmitter = new EventEmitter();
+  build: EventEmitter<any> = new EventEmitter();
   default() {
     console.log(`> ${this.constructor.name} ran default()`);
     console.log(this.config);
