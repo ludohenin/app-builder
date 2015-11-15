@@ -7,7 +7,7 @@ export class BaseTask {
   constructor() {
     console.log(`> ${this.constructor.name} instantiated`);
   }
-  default() {
+  default(done?: () => void): void {
     console.log(`> ${this.constructor.name} ran default() (method not implemented)`);
   }
 }

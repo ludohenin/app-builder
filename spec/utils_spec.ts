@@ -1,4 +1,10 @@
-import {classifyName, methodifyName, parseInstruction} from '../src/utils';
+import {
+  classifyName,
+  hasAsyncCallback,
+  methodifyName,
+  parseInstruction
+} from '../src/utils';
+
 
 describe('Utils', () => {
   describe('Classify Name', () => {
@@ -28,7 +34,7 @@ describe('Utils', () => {
     });
   });
 
-  describe('PArse Instruction', () => {
+  describe('Parse Instruction', () => {
     it('should parse the instruction', () => {
       var expected = { name: 'name', action: 'action' };
       expect(parseInstruction('name:action')).toEqual(expected);
@@ -36,6 +42,24 @@ describe('Utils', () => {
       expect(parseInstruction('name : action')).toEqual(expected);
       expect(parseInstruction(' name : action ')).toEqual(expected);
       expect(parseInstruction(' name : Action ')).toEqual(expected);
+    });
+  });
+
+  describe('Has Async Callback', () => {
+    it('should check if the passed function has an async callback', () => {
+      var a = function() {/*noop*/};
+      var b = function () {/*noop*/};
+      var c = function myFunction() {/*noop*/};
+      var d = function(done) {/*noop*/};
+      var e = function (done) {/*noop*/};
+      var f = function myOtherFunction(done) {/*noop*/};
+
+      expect(hasAsyncCallback(a)).toEqual(false);
+      expect(hasAsyncCallback(b)).toEqual(false);
+      expect(hasAsyncCallback(c)).toEqual(false);
+      expect(hasAsyncCallback(d)).toEqual(true);
+      expect(hasAsyncCallback(e)).toEqual(true);
+      expect(hasAsyncCallback(f)).toEqual(true);
     });
   });
 });

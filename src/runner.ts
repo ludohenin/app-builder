@@ -1,4 +1,5 @@
 import {Injectable} from 'angular2/angular2';
+import {series} from 'async';
 import {isFunction} from 'lodash';
 import {EventRegistry, LoadedTaskEntry, TaskRegistry, VirtualTaskEntry} from './registry';
 import {AppInjector} from './injector';
@@ -48,10 +49,16 @@ export class TaskRunner {
 
     this._link(taskClass, taskInstance);
 
-    // TODO: Check if the methods exist on the instance, throw otherwise.
     if (task.action) {
+      if (!taskInstance[task.action]) {
+        throw new Error(`Could not find method ${task.action} in class ${taskInstance.constructor.name}`); }
+
       taskInstance[task.action]();
+
     } else {
+      if (!taskInstance['default']) {
+        throw new Error(`Class ${taskInstance.constructor.name} has no default method`); }
+
       taskInstance['default']();
     }
   }

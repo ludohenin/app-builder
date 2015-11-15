@@ -6,11 +6,14 @@ init(TASK_PROVIDERS);
 
 load('example/tasks');
 
+task('build.app', ['build.js',
+                  'build.assets',
+                  'async.task',
+                  'build.index']);
+
 task('build', ['clean:dist',
                'lint',
-               'build.js',
-               'build.assets',
-               'build.index']);
+               'build.app']);
 
 
 // Would normally be called with cli cmd: app-buildr test.task
