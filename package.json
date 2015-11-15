@@ -21,11 +21,9 @@
   "license": "MIT",
   "dependencies": {
     "angular2": "2.0.0-alpha.46",
-    "extend": "^3.0.0",
     "lodash": "^3.10.1"
   },
   "devDependencies": {
-    "del": "^2.0.2",
     "gulp": "^3.9.0",
     "gulp-load-plugins": "^1.0.0",
     "jasmine": "^2.3.2",

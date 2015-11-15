@@ -33,16 +33,17 @@ export class TaskRunner {
   //       What do we handle here ?
   private _run(task: TaskInstruction, taskEntry: LoadedTaskEntry): void {
     let taskClass = taskEntry.task;
-    let taskInstance = AppInjector.get().resolveAndInstantiate(taskClass);
+    let taskInstance = AppInjector.injector.resolveAndInstantiate(taskClass);
 
     // Inject task dependencies.
     // Done this way to reduce constructor injection boilerplate of task class.
+    // NOTE: Injected providers are not accessible at instanciation time.
     // TODO: move this into AppInjector as static method.
     AppInjector.taskProviders.forEach((provider) => {
       let token = provider.token;
       let tokenname: string = isFunction(token) ? token.name : token;
       let propname: string = tokenname.charAt(0).toLowerCase() + tokenname.slice(1);
-      taskInstance[propname] = AppInjector.get().get(token);
+      taskInstance[propname] = AppInjector.injector.get(token);
     });
 
     this._link(taskClass, taskInstance);
@@ -64,7 +65,7 @@ export class TaskRunner {
     outputs.forEach(output => {
       let inputs = this._eventRegistry.getInputs(output.eventname);
       inputs.forEach(input => {
-        let inputTaskInstance = AppInjector.get().resolveAndInstantiate(input.task);
+        let inputTaskInstance = AppInjector.injector.resolveAndInstantiate(input.task);
         let observable = outputTaskInstance[output.eventaction];
         let observer = inputTaskInstance[input.eventaction];
 

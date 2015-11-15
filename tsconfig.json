@@ -9,7 +9,7 @@
         "noLib": false,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "sourceMap": true
+        "sourceMap": false
     },
     "exclude": [".c9", "node_modules"],
     "compileOnSave": false

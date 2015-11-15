@@ -1,5 +1,5 @@
 // TODO: Rename this file to `register`.
-import {Injectable} from 'angular2/angular2';
+import {forwardRef, Inject, Injectable} from 'angular2/angular2';
 import {find, where} from 'lodash';
 import {join} from 'path';
 import {TaskMetadata} from './metadata';
@@ -37,6 +37,58 @@ class Registry extends Array {
   // TODO: Check if these types are required.
   find<LoadedTaskEntry,VirtualTaskEntry>(query: any) {
     return find(this, query);
+  }
+}
+
+
+// NOTE: Should every task be registered as an observable?
+//       Would enable observers to subscribe without manually declaring observables.
+//       But maybe not such a good idea. Declarative way of registring a root task
+//       reponsible to trigger the event seems more reliable.
+//       One solution could be to only register as observable virtual tasks.
+@Injectable()
+export class TaskRegistry extends Registry {
+  constructor(@Inject(forwardRef(() => EventRegistry)) private _eventRegistry) {
+    super();
+  }
+  /**
+   * Register tasks from loaded task files.
+   * Task files must export a class whose name is a classified name of the
+   * file name.
+   * #example: my.awesome.task.ts => export MyAwesomeTask {}
+   */
+  registerLoadedTask(path: string): (taskname: string) => void {
+    return (taskname: string): void => {
+      let filename = join(path, taskname);
+      let filename_abs = join(process.cwd(), filename);
+      let classname = classifyName(taskname);
+      let task = require(filename_abs)[classname];
+      let isVirtual = false;
+
+      if (!task) {
+        throw new Error (`Could not find class ${classname} in ${filename}`); }
+
+      // TODO: Find a way to handle identical file names from different origin (forbid or namespace ?).
+      // let exist = this.find({taskname});
+      // if (exist) {
+      //   throw new Error(`Task ${taskname} is already registered from ${exist.filename}`); }
+
+      let taskEntry: LoadedTaskEntry = {filename, taskname, classname, task, isVirtual};
+      this.push(taskEntry);
+
+      this._eventRegistry.registerEvents(task);
+    };
+  }
+  /**
+   * Register virtal tasks.
+   * Typical use case is to define sequences of loaded tasks.
+   * TODO: See if it would make sense to not only be able to pass array os string but Types or Types[].
+   */
+  registerVirtualTask(taskname: string, sequence: string[]): void {
+    let isVirtual = true;
+    let taskEntry: VirtualTaskEntry = {taskname, sequence, isVirtual};
+
+    this.push(taskEntry);
   }
 }
 
@@ -80,55 +132,5 @@ export class EventRegistry extends Registry {
    */
   getInputs(eventname: string): EventEntry[] {
     return where(this, {eventname, type: 'inputs'});
-  }
-}
-
-// NOTE: Should every task be registered as an observable?
-//       Would enable observers to subscribe without manually declaring observables.
-//       But maybe not such a good idea. Declarative way of registring a root task
-//       reponsible to trigger the event seems more reliable.
-@Injectable()
-export class TaskRegistry extends Registry {
-  constructor(private _eventRegistry: EventRegistry) {
-    super();
-  }
-  /**
-   * Register tasks from loaded task files.
-   * Task files must export a class whose name is a classified name of the
-   * file name.
-   * #example: my.awesome.task.ts => export MyAwesomeTask {}
-   */
-  registerLoadedTask(path: string): (taskname: string) => void {
-    return (taskname: string): void => {
-      let filename = join(path, taskname);
-      let filename_abs = join(process.cwd(), filename);
-      let classname = classifyName(taskname);
-      let task = require(filename_abs)[classname];
-      let isVirtual = false;
-
-      if (!task) {
-        throw new Error (`Could not find class ${classname} in ${filename}`); }
-
-      // TODO: Find a way to handle identical file names from different origin (forbid or namespace ?).
-      // let exist = this.find({taskname});
-      // if (exist) {
-      //   throw new Error(`Task ${taskname} is already registered from ${exist.filename}`); }
-
-      let taskEntry: LoadedTaskEntry = {filename, taskname, classname, task, isVirtual};
-      this.push(taskEntry);
-
-      this._eventRegistry.registerEvents(task);
-    };
-  }
-  /**
-   * Register virtal tasks.
-   * Typical use case is to define sequences of loaded tasks.
-   * TODO: See if it would make sense to not only be able to pass array os string but Types or Types[].
-   */
-  registerVirtualTask(taskname: string, sequence: string[]): void {
-    let isVirtual = true;
-    let taskEntry: VirtualTaskEntry = {taskname, sequence, isVirtual};
-
-    this.push(taskEntry);
   }
 }

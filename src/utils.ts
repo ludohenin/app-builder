@@ -17,12 +17,14 @@ export function classifyName(name: string): string {
  * #example: my.string-to_transfrom => myStringToTransfrom
  */
 export function methodifyName(name: string): string {
-  return name.toLowerCase()
-    .replace(/[-_\.]+/g, ' ')
-    .trim()
-    .replace(/[^\w\s]/g, '')
-    .replace(/ (.)/g, function($1) { return $1.toUpperCase(); })
-    .replace(/ /g, '');
+  name = name.replace(/[-_\.]+/g, ' ');
+  name = name.trim();
+  return name.split(/[\s]+/g)
+    .map((frag: string, i: number) => {
+      return i > 0
+        ? frag.charAt(0).toUpperCase() + frag.slice(1)
+        : frag.charAt(0).toLowerCase() + frag.slice(1);
+    }).join('');
 }
 
 /**
