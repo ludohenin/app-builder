@@ -38,7 +38,7 @@ export class TaskRunner {
     // Inject task dependencies.
     // Done this way to reduce constructor injection boilerplate of task class.
     // NOTE: Injected providers are not accessible at instanciation time.
-    // TODO: move this into AppInjector as static method.
+    // TODO: Move this into AppInjector as static method.
     AppInjector.taskProviders.forEach((provider) => {
       let token = provider.token;
       let tokenname: string = isFunction(token) ? token.name : token;
@@ -48,6 +48,7 @@ export class TaskRunner {
 
     this._link(taskClass, taskInstance);
 
+    // TODO: Check if the methods exist on the instance, throw otherwise.
     if (task.action) {
       taskInstance[task.action]();
     } else {

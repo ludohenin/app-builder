@@ -10,7 +10,7 @@ interface TaskEntry {
   taskname: string;
 }
 
-// TODO: add isAsync, injector.
+// TODO: Add isAsync, injector.
 export interface LoadedTaskEntry extends TaskEntry {
   filename: string;
   classname: string;

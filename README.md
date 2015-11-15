@@ -1,6 +1,6 @@
 # app-buildr
 
-__WIP__ (not at all ready)
+__WIP__ (not at all ready). See [TODO/NOTES](TODO.md).
 
 Build library for web application.
 
