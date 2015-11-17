@@ -1,19 +1,13 @@
-import {makeDecorator} from 'angular2/src/core/util/decorators';
+import {AppInjector} from './injector';
+import {TaskRegistry} from './registry';
 
+export function Task(options: {
+  name: string;
+}) {
+  return function (target: any) {
+    let taskRegistry: TaskRegistry = AppInjector.get(TaskRegistry);
+    taskRegistry.add(options.name, target);
 
-interface TaskMetadataOptions {
-  inputs?: string[];
-  outputs?: string[];
-  [key: string]: string[];
-}
-
-interface TaskFactory {
-  (obj?: TaskMetadataOptions): any;
-}
-
-export class TaskMetadata {
-  constructor(public options: TaskMetadataOptions) {
+    return target;
   }
 }
-
-export var Task: TaskFactory = <TaskFactory>makeDecorator(TaskMetadata);

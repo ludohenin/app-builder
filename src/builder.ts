@@ -1,16 +1,18 @@
 import {Injectable} from 'angular2/angular2';
 import {AppInjector} from './injector';
 import {TaskLoader} from './loader';
-import {TaskRegistry} from './registry';
+import {SequenceRegistry, TaskRegistry} from './registry';
 import {TaskRunner} from './runner';
 
 
 let builderInstance: Builder;
 
+
 @Injectable()
 export class Builder {
-  constructor(private _taskRegistry: TaskRegistry,
-              private _loader: TaskLoader,
+  constructor(private _loader: TaskLoader,
+              private _sequenceRegistry: SequenceRegistry,
+              private _taskRegistry: TaskRegistry,
               private _runner: TaskRunner) {
   }
   static init(coreProviders: any[], buildProviders?: any[]): void {
@@ -20,8 +22,8 @@ export class Builder {
   static load(path: string | string[]): void {
     builderInstance._loader.load(path);
   }
-  static task(taskname: string, sequence: any[]): void {
-    builderInstance._taskRegistry.registerVirtualTask(taskname, sequence);
+  static task(name: string, sequence: any[]): void {
+    builderInstance._sequenceRegistry.add(name, sequence);
   }
   static start(taskname: string): void {
     builderInstance._runner.run(taskname);

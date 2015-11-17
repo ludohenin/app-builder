@@ -2,7 +2,7 @@ import {Task} from '../../app-buildr';
 import {BaseTask} from '../base_task';
 
 
-@Task()
+@Task({ name: 'clean' })
 export class Clean extends BaseTask {
   all() {
     console.log(`> ${this.constructor.name} ran all().`);

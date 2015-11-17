@@ -2,5 +2,5 @@ import {Task} from '../../app-buildr';
 import {BaseTask} from '../base_task';
 
 
-@Task()
+@Task({ name: 'lint' })
 export class Lint extends BaseTask {}

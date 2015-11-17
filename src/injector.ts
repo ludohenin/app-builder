@@ -7,17 +7,20 @@ export class AppInjector {
   static taskProviders: Provider[];
   private static _injector: Injector;
   private static _rootInjector: Injector;
-  static init(corProviders: any[], providers: any[]): Injector {
+  static init(coreProviders: any[], providers: any[]): Injector {
     if (initialized) {
       throw new Error('AppInjector can only be initialized once'); }
 
     AppInjector.taskProviders = providers;
-    AppInjector._rootInjector = Injector.resolveAndCreate(corProviders);
+    AppInjector._rootInjector = Injector.resolveAndCreate(coreProviders);
     AppInjector._injector = AppInjector._rootInjector.resolveAndCreateChild(providers);
     initialized = true;
     return AppInjector._injector;
   }
   static get injector(): Injector {
     return AppInjector._injector;
+  }
+  static get(token: any): any {
+    return AppInjector._injector.get(token);
   }
 }

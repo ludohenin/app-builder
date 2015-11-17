@@ -1,14 +1,15 @@
 require('reflect-metadata/Reflect');
 import {Builder} from './src/builder';
-import {TaskLoader} from './src/loader';
-import {TaskRegistry, EventRegistry} from './src/registry';
+import {TaskLoader, Loader} from './src/loader';
+import {SequenceRegistry, TaskRegistry} from './src/registry';
 import {TaskRunner} from './src/runner';
 
 const CORE_PROVIDERS = [
   Builder,
-  EventRegistry,
-  TaskLoader,
+  Loader,
+  SequenceRegistry,
   TaskRegistry,
+  TaskLoader,
   TaskRunner
 ];
 

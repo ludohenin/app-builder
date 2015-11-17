@@ -39,7 +39,7 @@ export function parseInstruction(instruction: string): {
 } {
   let frags = instruction.split(':');
   let name = frags[0].trim();
-  let action = frags[1] ? methodifyName(frags[1]) : undefined;
+  let action = frags[1] ? methodifyName(frags[1]) : 'default';
 
   return {name, action};
 }

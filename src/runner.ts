@@ -1,83 +1,51 @@
 import {Injectable} from 'angular2/angular2';
 import {series} from 'async';
 import {isFunction} from 'lodash';
-import {EventRegistry, LoadedTaskEntry, TaskRegistry, VirtualTaskEntry} from './registry';
 import {AppInjector} from './injector';
 import {hasAsyncCallback, parseInstruction} from './utils';
+import {SequenceEntry, SequenceRegistry, TaskEntry, TaskRegistry} from './registry';
 
-
-export interface TaskInstruction {
-  name: string;
-  action: string;
-}
-
-interface AsyncFunction {
-  (fn: () => void): void;
-}
-
+// TODO: See if parseInstruction can't be replace by getAction.
 
 @Injectable()
 export class TaskRunner {
-  private _sequence: string[] = [];
-  private _queue: AsyncFunction[] = [];
+  private _taskSequence: TaskInstruction[];
+  private _queue;
   constructor(private _taskRegistry: TaskRegistry,
-              private _eventRegistry: EventRegistry) {
+              private _sequenceRegistry: SequenceRegistry) {
   }
-  run(taskInstruction: string): void {
-    let task = parseInstruction(taskInstruction);
-    let taskEntry = this._taskRegistry.find({taskname: task.name});
+  run(instruction) {
+    this._taskSequence = [];
+    this._queue = [];
+    let taskInstruction = this._getTaskInstruction(instruction);
 
-    if (taskEntry.isVirtual) {
-      this._runVirtual(taskEntry);
+    if (taskInstruction) {
+      this._addTask(taskInstruction);
     } else {
-      this._runSingle(taskInstruction);
+      let sequenceInstruction = this._sequenceRegistry.find({ name: instruction });
+      this._buildSequence(sequenceInstruction.sequence);
+      this._taskSequence.forEach(taskInstruction => this._addTask(taskInstruction));
     }
-  }
-  private _run() {
-    console.log(this._queue);
+
     series(this._queue, function (err) {
       if (err) console.log(err);
       console.log('Completed');
     });
   }
-  private _runSingle(taskInstruction: string): void {
-    this._addTask(taskInstruction);
-    this._run();
-  }
-  private _runVirtual(taskEntry: VirtualTaskEntry): void {
-    this._buildSequence(taskEntry);
-    this._sequence.forEach(instruction => this._addTask.call(this, instruction));
-    this._run();
-  }
-  private _addTask(taskInstruction: string) {
-    let task = parseInstruction(taskInstruction);
-    let taskEntry = this._taskRegistry.find({taskname: task.name});
+  private _addTask(taskInstruction: TaskInstruction) {
+    let taskInstance = this._getTaskInstance(taskInstruction.token);
+    let action: string = taskInstruction.action;
 
-    if (!taskEntry) {
-      throw new Error(`Could not find task ${task.name}, task not registered`); }
-
-    let taskInstance = this._getTaskInstance(taskEntry);
-    let taskAction: string;
-
-    if (task.action) {
-      if (!taskInstance[task.action]) {
-        throw new Error(`Could not find method ${task.action} in class ${taskInstance.constructor.name}`); }
-      taskAction = task.action;
-    } else {
-      if (!taskInstance['default']) {
-        throw new Error(`Class ${taskInstance.constructor.name} has no default method`); }
-      taskAction = 'default';
-    }
+    if (!taskInstance[action]) {
+      throw new Error(`Could not find method ${action} in class ${taskInstance.constructor.name}`); }
 
     this._queue.push(done => {
-      let isAsync = hasAsyncCallback(taskInstance[taskAction]);
-      taskInstance[taskAction].call(taskInstance, isAsync ? done : null);
-      if (isAsync) done();
+      let isAsync = hasAsyncCallback(taskInstance[action]);
+      taskInstance[action].call(taskInstance, isAsync ? done : null);
+      if (!isAsync) done(null);
     });
   }
-  // TODO: Move to register class.
-  private _getTaskInstance(taskEntry: LoadedTaskEntry): any {
-    let taskClass = taskEntry.task;
+  private _getTaskInstance(taskClass: any): any {
     let taskInstance = AppInjector.injector.resolveAndInstantiate(taskClass);
 
     // Inject task dependencies.
@@ -90,43 +58,37 @@ export class TaskRunner {
       taskInstance[propname] = AppInjector.injector.get(token);
     });
 
-    this._link(taskClass, taskInstance);
+    // this._link(taskClass, taskInstance);
 
     return taskInstance;
   }
-  private _buildSequence(taskEntry: VirtualTaskEntry): void {
-    taskEntry.sequence.forEach(taskInstruction => {
-      let task = parseInstruction(taskInstruction);
-      let taskEntry = this._taskRegistry.find({taskname: task.name});
+  private _buildSequence(sequence: string[]): void {
+    sequence.forEach(instruction => {
+      let taskInstruction = this._getTaskInstruction(instruction);
 
-      if (taskEntry.isVirtual) {
-        this._buildSequence(taskEntry);
+      if (taskInstruction) {
+        this._taskSequence.push(taskInstruction);
       } else {
-        this._sequence.push(taskInstruction);
+        let sequenceEntry: SequenceEntry = this._sequenceRegistry.find({ name: instruction });
+        this._buildSequence(sequenceEntry.sequence);
       }
     });
   }
-  private _link(task: any, outputTaskInstance: any): void {
-    let outputs = this._eventRegistry.getOutputs(task);
-
-    outputs.forEach(output => {
-      let inputs = this._eventRegistry.getInputs(output.eventname);
-      inputs.forEach(input => {
-        let inputTaskInstance = AppInjector.injector.resolveAndInstantiate(input.task);
-        let observable = outputTaskInstance[output.eventaction];
-        let observer = inputTaskInstance[input.eventaction];
-
-        if (!(output.eventaction in outputTaskInstance)) {
-          throw new Error(`Could not find ${output.eventaction} in task ${output.task.name}`); }
-        if (!(input.eventaction in inputTaskInstance)) {
-          throw new Error(`Could not find ${input.eventaction} in task ${input.task.name}`); }
-
-        observable.subscribe({next: observer.bind(inputTaskInstance)});
-
-        // link recursively.
-        // TODO: Check for circular references.
-        this._link(input.task, inputTaskInstance);
-      });
-    });
+  private _getTaskInstruction(instruction: string): TaskInstruction {
+    let taskInstruction = parseInstruction(instruction);
+    let taskEntry = this._taskRegistry.find({ name: taskInstruction.name });
+    if (!taskEntry) return undefined;
+    return {
+      name: taskEntry.name,
+      token: taskEntry.token,
+      action: taskInstruction.action
+    };
   }
+}
+
+// TODO: Rename interface TaskInstruction
+interface TaskInstruction {
+  name: string;
+  token: any;
+  action: string;
 }

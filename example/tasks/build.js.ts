@@ -2,7 +2,7 @@ import {Task, EventEmitter} from '../../app-buildr';
 import {BaseTask} from '../base_task';
 
 
-@Task({ outputs: ['build'] })
+@Task({ name: 'build.js' })
 export class BuildJs extends BaseTask {
   build: EventEmitter<any> = new EventEmitter();
   default(done) {
