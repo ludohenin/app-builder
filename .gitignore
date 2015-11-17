@@ -30,6 +30,7 @@ node_modules
 
 #IntelliJ configuration files
 .idea
+.vscode
 
 dist
 dev

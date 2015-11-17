@@ -5,6 +5,6 @@ import {BaseTask} from '../base_task';
 export class AsyncTask extends BaseTask {
   default(done) {
     console.log(`> ${this.constructor.name} ran default()`);
-    setTimeout(() => done(), 2000);
+    setTimeout(() => done(null), 2000);
   }
 }

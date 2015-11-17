@@ -10,6 +10,6 @@ export class SubBuildJs extends BaseTask {
   build: EventEmitter<any> = new EventEmitter();
   onbuild() {
     console.log(`> ${this.constructor.name} ran build().`);
-    setTimeout(() => this.build.next(null), 1000);
+    setTimeout(() => this.build.next(null), 3000);
   }
 }

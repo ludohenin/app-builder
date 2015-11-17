@@ -48,7 +48,7 @@ export function parseInstruction(instruction: string): {
  * Test a function signature and if it has an argument.
  * In the context of this tool, this would mean it is an async callback.
  */
-export function hasAsyncCallback(fn: Function): boolean {
+export function hasAsyncCallback(fn: (cb?: () => void) => void): boolean {
   if (!isFunction(fn)) return false;
   let re = /function(.*?)\(.+\)/;
   return re.test(fn.toString());

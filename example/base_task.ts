@@ -9,5 +9,6 @@ export class BaseTask {
   }
   default(done?: () => void): void {
     console.log(`> ${this.constructor.name} ran default() (method not implemented)`);
+    if (done) done();
   }
 }
